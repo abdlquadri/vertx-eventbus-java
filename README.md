@@ -3,6 +3,9 @@
 
 A Vert.x EventBus client written in Java uses Netty, works on Android:
 
+Sample Android Chat app https://github.com/abdlquadri/VertxEventBusChat .
+Sample Vert.x Server bridged to TCP https://github.com/abdlquadri/vertx-tcp-bridged-chat-server.
+
 ```java
 final CountDownLatch countDownLatch = new CountDownLatch(1);
         EventBus.connect("127.0.0.1", 7000, new ConnectHandler() {
