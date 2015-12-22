@@ -1,7 +1,7 @@
 # vertx-eventbus-java
 
 
-A Vert.x EventBus client written in Java, works on Android:
+A Vert.x EventBus client written in Java uses Netty, works on Android:
 
 ```java
 final CountDownLatch countDownLatch = new CountDownLatch(1);
