@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-    compile "io.netty:netty-handler:5.0.0.Alpha2"
+    compile "io.netty:netty-handler:4.1.0.Beta8"
     compile "org.sharegov:mjson:1.3"
 
 

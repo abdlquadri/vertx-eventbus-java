@@ -5,7 +5,6 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
 import mjson.Json;
 import ng.abdlquadri.eventbus.handlers.Handler;
 import ng.abdlquadri.eventbus.handlers.WriteHandler;
@@ -13,7 +12,6 @@ import ng.abdlquadri.eventbus.senders.ReplySender;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Created by abdlquadri on 12/19/15.
@@ -34,7 +32,7 @@ public class EventBusUtil {
         });
     }
 
-    public static void writeToWire(Channel channel, String jsonObject,final WriteHandler writeHandler) {
+    public static void writeToWire(Channel channel, String jsonObject, final WriteHandler writeHandler) {
         int length = jsonObject.length();
         ByteBuf buffer = Unpooled.buffer()
                 .writeInt(length)
