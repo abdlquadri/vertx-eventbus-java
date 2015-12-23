@@ -1,7 +1,6 @@
 package ng.abdlquadri.eventbus;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import mjson.Json;
@@ -12,7 +11,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static ng.abdlquadri.eventbus.EventBus.*;
-import static ng.abdlquadri.eventbus.EventBusUtil.*;
+import static ng.abdlquadri.eventbus.EventBusUtil.addReplySender;
+import static ng.abdlquadri.eventbus.EventBusUtil.sendPing;
 
 /**
  * Created by abdlquadri on 12/9/15.
@@ -54,7 +54,7 @@ public class EventBusFrameHandler extends SimpleChannelInboundHandler {
     }
 
     @Override
-    protected void messageReceived(ChannelHandlerContext ctx, Object msg) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
         ByteBuf inMsg = (ByteBuf) msg;
         int messageLength = inMsg.readInt();
         StringBuilder message = new StringBuilder();
