@@ -44,7 +44,6 @@ public class EventBusFrameHandler extends SimpleChannelInboundHandler {
 
         String eventBusMessage = message.toString();
         Json json = Json.read(eventBusMessage);
-        System.out.println("RAW " + json.toString());
         final Json replyAddress = json.at("replyAddress");
         Json address = json.at("address");
         Json type = json.at("type");
@@ -70,7 +69,6 @@ public class EventBusFrameHandler extends SimpleChannelInboundHandler {
         }
 
         if (address != null) {
-            System.out.println(address.asString());
             String stAddress = address.asString();
             if (handlers.containsKey(stAddress)) {
                 System.out.println("we are here");
@@ -88,7 +86,6 @@ public class EventBusFrameHandler extends SimpleChannelInboundHandler {
 //                    }
 //                });
             } else if (replyHandlers.containsKey(stAddress)) {
-                System.out.println("we are reply");
                 Handler replyMessageHandlers = replyHandlers.get(stAddress);
                 replyMessageHandlers.handle(eventBusMessage);
                 replyHandlers.remove(stAddress);
