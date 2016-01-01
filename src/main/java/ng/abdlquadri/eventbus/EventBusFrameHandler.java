@@ -71,7 +71,6 @@ public class EventBusFrameHandler extends SimpleChannelInboundHandler {
         if (address != null) {
             String stAddress = address.asString();
             if (handlers.containsKey(stAddress)) {
-                System.out.println("we are here");
                 List<Handler> messageHandlers = handlers.get(stAddress);
                 for (Handler h : messageHandlers) {
 
