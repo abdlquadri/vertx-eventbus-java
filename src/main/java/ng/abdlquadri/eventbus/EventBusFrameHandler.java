@@ -23,34 +23,13 @@ public class EventBusFrameHandler extends SimpleChannelInboundHandler {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
 
         sendPing(channel);
-//        EventBus.registerHandler("echo", new Handler() {
-//            @Override
-//            public void handle(String message) {
-//                System.out.println("Register: " + message);
-//            }
-//        });
         ctx.channel().eventLoop().scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 sendPing(channel);
-//                testing();
             }
         }, 5, 5, TimeUnit.SECONDS);
 
-    }
-
-    private void testing() {
-
-
-        EventBus.send("echo", Json.object().set("value", "from ccc Bridge").toString(), Json.object().set("headerkey", "headervalue").toString(), new Handler() {
-            @Override
-            public void handle(String message) {
-                System.out.println("Response " + message);
-                String address = Json.read(message).at("address").asString();
-                System.out.println(address);
-                EventBus.send(address, Json.object().set("rep", "rep").toString());
-            }
-        });
     }
 
     @Override
@@ -98,7 +77,7 @@ public class EventBusFrameHandler extends SimpleChannelInboundHandler {
                 List<Handler> messageHandlers = handlers.get(stAddress);
                 for (Handler h : messageHandlers) {
 
-//                    if(type.equals("err"))
+//                    if(type.equals("err")) //if we have error what to do
                     h.handle(eventBusMessage);
 
                 }
@@ -122,7 +101,7 @@ public class EventBusFrameHandler extends SimpleChannelInboundHandler {
                 }
             }
         }
-//        ctx.close();
+//        ctx.close();// should we really leave the connection opened
     }
 
 
