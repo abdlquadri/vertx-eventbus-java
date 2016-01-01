@@ -79,12 +79,6 @@ public class EventBusFrameHandler extends SimpleChannelInboundHandler {
                     h.handle(eventBusMessage);
 
                 }
-//                EventBus.addHandler(address, new Handler() {
-//                    @Override
-//                    public void handle(String message) {
-//                        send(ctx, message);
-//                    }
-//                });
             } else if (replyHandlers.containsKey(stAddress)) {
                 Handler replyMessageHandlers = replyHandlers.get(stAddress);
                 replyMessageHandlers.handle(eventBusMessage);
