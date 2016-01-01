@@ -38,17 +38,22 @@ public class EventBusUtil {
                 .writeInt(length)
                 .writeBytes(jsonObject.getBytes());
 
-        ChannelFuture channelFuture = channel.writeAndFlush(buffer);
-        channelFuture.addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture future) throws Exception {
-                if (future.isDone() && future.isSuccess()) {
-                    writeHandler.written(true);
-                } else {
-                    writeHandler.written(false);
+        if (channel != null) {
+            ChannelFuture channelFuture = channel.writeAndFlush(buffer);
+            channelFuture.addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture future) throws Exception {
+                    if (future.isDone() && future.isSuccess()) {
+                        writeHandler.written(true);
+                    } else {
+                        writeHandler.written(false);
+                    }
                 }
-            }
-        });
+            });
+        }else {
+            throw new IllegalStateException("Channel is not connected. Make sure the server is reachable and call EventBus.connect() method first.");
+        }
+
     }
 
     public static void addHandler(String address, Handler handler) {

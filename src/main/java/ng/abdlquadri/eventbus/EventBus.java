@@ -205,7 +205,12 @@ public class EventBus {
     }
 
     public static void close() {
-        channel.close();
+        if(channel !=null){
+            channel.close();
+        }else {
+            throw new IllegalStateException("Channel is not connected. You can not close a non existent connection :). Make sure the server is reachable and call EventBus.connect() method first.");
+
+        }
     }
 
 
