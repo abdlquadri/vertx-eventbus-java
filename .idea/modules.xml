@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/vertx-eventbus-java.iml" filepath="$PROJECT_DIR$/vertx-eventbus-java.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/vertx-eventbus-java.iml" filepath="$PROJECT_DIR$/.idea/modules/vertx-eventbus-java.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/vertx-eventbus-java_main.iml" filepath="$PROJECT_DIR$/.idea/modules/vertx-eventbus-java_main.iml" group="vertx-eventbus-java" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/vertx-eventbus-java_test.iml" filepath="$PROJECT_DIR$/.idea/modules/vertx-eventbus-java_test.iml" group="vertx-eventbus-java" />
     </modules>
   </component>
 </project>
