@@ -18,5 +18,9 @@
         <processorPath useClasspath="true" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="vertx-eventbus-java_main" target="1.5" />
+      <module name="vertx-eventbus-java_test" target="1.5" />
+    </bytecodeTargetLevel>
   </component>
 </project>
