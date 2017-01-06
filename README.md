@@ -5,7 +5,7 @@ A [Vert.x EventBus](http://vertx.io/docs/vertx-core/java/#event_bus) client writ
 
 # Building
 
-./gradlew jar . The jar file will be in build/libs.
+`./gradlew jar` . The jar file will be in build/libs.
 
 # Dependencies
 
@@ -14,37 +14,39 @@ A [Vert.x EventBus](http://vertx.io/docs/vertx-core/java/#event_bus) client writ
     compile "org.sharegov:mjson:1.3"
 ```
 
-Sample Android Chat app [Vertx Event Bus Chat](https://github.com/abdlquadri/VertxEventBusChat) .
-Sample Vert.x Server bridged to TCP [vertx-tcp-bridged-chat-server](https://github.com/abdlquadri/vertx-tcp-bridged-chat-server).
+# Sample projects
+* Sample Android Chat app [Vertx Event Bus Chat](https://github.com/abdlquadri/VertxEventBusChat).
+* Sample Vert.x Server bridged to TCP [vertx-tcp-bridged-chat-server](https://github.com/abdlquadri/vertx-tcp-bridged-chat-server).
 
+# Usage
 ```java
 final CountDownLatch countDownLatch = new CountDownLatch(1);
-        EventBus.connect("127.0.0.1", 7000, new ConnectHandler() {
-            @Override
-            public void connected(boolean isConnected) {
-                if (isConnected) {
-                    assertTrue(isConnected);
-                } else {
-                    assertFalse(isConnected);
-                }
-                countDownLatch.countDown();
-            }
-        });
-        countDownLatch.await();
+EventBus.connect("127.0.0.1", 7000, new ConnectHandler() {
+  @Override
+  public void connected(boolean isConnected) {
+    if (isConnected) {
+      assertTrue(isConnected);
+    } else {
+      assertFalse(isConnected);
+    }
+    countDownLatch.countDown();
+  }
+});
+countDownLatch.await();
 ```
 
 
 ```java
 final CountDownLatch countDownLatch = new CountDownLatch(1);
-        EventBus.registerHandler("hello", new Handler() {
-            @Override
-            public void handle(String message) {
-                
-                assertEquals("some messgae", Json.read(message).at("body").at("value").asString());
-                countDownLatch.countDown();
-            }
-        });
+EventBus.registerHandler("hello", new Handler() {
+  @Override
+  public void handle(String message) {
 
-        EventBus.publish("hello", Json.object().set("value", "some messgae").toString());
-        countDownLatch.await();
+    assertEquals("some messgae", Json.read(message).at("body").at("value").asString());
+    countDownLatch.countDown();
+  }
+});
+
+EventBus.publish("hello", Json.object().set("value", "some messgae").toString());
+countDownLatch.await();
 ```
