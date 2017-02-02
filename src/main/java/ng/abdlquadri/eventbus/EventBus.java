@@ -5,9 +5,11 @@ import static ng.abdlquadri.eventbus.EventBusUtil.addReplyHandler;
 import static ng.abdlquadri.eventbus.EventBusUtil.writeToWire;
 
 import java.net.InetSocketAddress;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -17,9 +19,11 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
 import mjson.Json;
+
 import ng.abdlquadri.eventbus.handlers.ConnectHandler;
 import ng.abdlquadri.eventbus.handlers.Handler;
 import ng.abdlquadri.eventbus.handlers.WriteHandler;
+import ng.abdlquadri.eventbus.senders.ReplySender;
 import ng.abdlquadri.eventbus.util.EventBusMessageAttributes;
 
 /**
@@ -27,8 +31,10 @@ import ng.abdlquadri.eventbus.util.EventBusMessageAttributes;
  */
 public class EventBus {
 
-  private static Channel channel;
-  private static final ConcurrentHashMap<String, List<Handler>> handlers = new ConcurrentHashMap<String, List<Handler>>();
+  public static Channel channel;
+  public static final ConcurrentMap<String, List<Handler>> handlers = new ConcurrentHashMap<String, List<Handler>>();
+  public static final ConcurrentMap<String, Handler> replyHandlers = new ConcurrentHashMap<String, Handler>();
+  protected static HashMap<String, ReplySender> replySenders = new HashMap<String, ReplySender>();
 
   private EventBus() {
   }
