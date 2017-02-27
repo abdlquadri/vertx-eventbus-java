@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -30,17 +32,20 @@ import ng.abdlquadri.eventbus.util.EventBusMessageAttributes;
  * Created by abdlquadri on 12/9/15.
  */
 public class EventBus {
+  private static Logger log = Logger.getLogger(EventBus.class.getName());
 
   public static Channel channel;
   public static final ConcurrentMap<String, List<Handler>> handlers = new ConcurrentHashMap<String, List<Handler>>();
   public static final ConcurrentMap<String, Handler> replyHandlers = new ConcurrentHashMap<String, Handler>();
   protected static HashMap<String, ReplySender> replySenders = new HashMap<String, ReplySender>();
+  public static ConnectHandler globalConnectHandler;
 
   private EventBus() {
   }
 
   public static void send(String address, String jsonMessage, String jsonHeaders, Handler handler) {
     String replyAddress = UUID.randomUUID().toString();
+    log.log(Level.INFO, "Making a SEND to EventBus Server");
 
     Json json = Json.object().set(EventBusMessageAttributes.TYPE, "send")
       .set(EventBusMessageAttributes.ADDRESS, address)
@@ -51,7 +56,7 @@ public class EventBus {
     writeToWire(channel, json.toString(), new WriteHandler() {
       @Override
       public void written(boolean isWritten) {
-
+        log.log(Level.INFO, "Done Making a SEND to EventBus Server");
       }
     });
   }
@@ -73,6 +78,8 @@ public class EventBus {
   }
 
   public static void send(String address, String jsonMessage, String jsonHeaders) {
+    log.log(Level.INFO, "Making a SEND to EventBus Server");
+
     Json json = Json.object().set(EventBusMessageAttributes.TYPE, "send")
       .set(EventBusMessageAttributes.ADDRESS, address)
       .set(EventBusMessageAttributes.HEADERS, Json.read(jsonHeaders))
@@ -80,12 +87,14 @@ public class EventBus {
     writeToWire(channel, json.toString(), new WriteHandler() {
       @Override
       public void written(boolean isWritten) {
+        log.log(Level.INFO, "Done Making a SEND to EventBus Server");
 
       }
     });
   }
 
   public static void publish(String address, String jsonMessage, String jsonHeaders) {
+    log.log(Level.INFO, "Making a PUBLISH to EventBus Server");
     Json json = Json.object().set(EventBusMessageAttributes.TYPE, "publish")
       .set(EventBusMessageAttributes.ADDRESS, address)
       .set(EventBusMessageAttributes.HEADERS, Json.read(jsonHeaders))
@@ -93,6 +102,7 @@ public class EventBus {
     writeToWire(channel, json.toString(), new WriteHandler() {
       @Override
       public void written(boolean isWritten) {
+        log.log(Level.INFO, "Done Making a PUBLISH to EventBus Server");
 
       }
     });
@@ -185,7 +195,7 @@ public class EventBus {
 
 
   public static void connect(String host, int port, final ConnectHandler connectHandler) {
-
+    log.log(Level.INFO, "Connecting to EventBus Server");
     NioEventLoopGroup group = new NioEventLoopGroup();
 
     Bootstrap bootstrap = new Bootstrap();
@@ -201,9 +211,14 @@ public class EventBus {
       public void operationComplete(ChannelFuture future) throws Exception {
         if (future.isSuccess() && channelFuture.isDone() && channelFuture.channel().isActive()) {
           channel = future.channel();
-          connectHandler.connected(channelFuture.channel().isActive());
+          globalConnectHandler = connectHandler;
+          connectHandler.onConnect(channelFuture.channel().isActive());
+          log.log(Level.INFO, "Done Connecting to EventBus Server");
+
         } else {
-          connectHandler.connected(false);
+          connectHandler.onConnect(false);
+          log.log(Level.SEVERE, "Failed Connecting to EventBus Server");
+
         }
 
       }
@@ -213,8 +228,20 @@ public class EventBus {
 
   public static void close() {
     if (channel != null) {
-      channel.close();
+      final ChannelFuture closeFuture = channel.close();
+      closeFuture.addListener(new ChannelFutureListener() {
+        public void operationComplete(ChannelFuture future) throws Exception {
+          if (future.isSuccess() && future.isDone()){
+            log.log(Level.SEVERE, "Channel Successful Closed");
+
+          }else {
+            log.log(Level.SEVERE, "Channel Failed Closed {1}", future.cause());
+
+          }
+        }
+      });
     } else {
+      log.log(Level.SEVERE, "Channel is not connected. You can not close a non existent connection :). Make sure the server is reachable and call EventBus.connect() method first.");
       throw new IllegalStateException("Channel is not connected. You can not close a non existent connection :). Make sure the server is reachable and call EventBus.connect() method first.");
 
     }
