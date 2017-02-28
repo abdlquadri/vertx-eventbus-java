@@ -71,13 +71,14 @@ public class EventBusUtil {
         }
       });
     } else {
-      throw new IllegalStateException("Channel is not connected. Make sure the server is reachable and call EventBus.connect() method first.");
+      throw new IllegalStateException("Channel is not connected. Make sure the server is  reachable and call EventBus" +
+        ".connect() method first.");
     }
   }
 
   public static void addHandler(String address, Handler handler) {
     List<Handler> handlers = EventBus.handlers.get(address);
-    log.log(Level.INFO, "Adding Handlers to Eventbus. # of Current Hanlders {1}", handlers.size());
+    log.log(Level.INFO, "Adding Handlers to Eventbus.");
     if (handlers == null) {
 
       handlers = new ArrayList<Handler>();
