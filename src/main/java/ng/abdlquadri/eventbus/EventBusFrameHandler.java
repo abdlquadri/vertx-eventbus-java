@@ -28,12 +28,15 @@ public class EventBusFrameHandler extends SimpleChannelInboundHandler {
 
   @Override
   public void channelActive(ChannelHandlerContext ctx) throws Exception {
-
-    sendPing(channel);
+    if (channel.isActive()) {
+      sendPing(channel);
+    }
     ctx.channel().eventLoop().scheduleAtFixedRate(new Runnable() {
       @Override
       public void run() {
-        sendPing(channel);
+        if (channel.isActive()) {
+          sendPing(channel);
+        }
       }
     }, 5, 5, TimeUnit.SECONDS);
 
