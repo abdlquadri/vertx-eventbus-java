@@ -3,9 +3,12 @@
 
 A [Vert.x EventBus](http://vertx.io/docs/vertx-core/java/#event_bus) client written in Java uses [Netty](http://netty.io/), works on Android 2.3.7 +:
 
+# Testing
+`./gradlew test`
+
 # Building
 
-`./gradlew jar` . The jar file will be in build/libs.
+`./gradlew build` . The jar file will be in build/libs.
 
 # Dependencies
 
