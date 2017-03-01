@@ -3,20 +3,27 @@ version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
 
-sourceCompatibility = 1.5
+project.sourceCompatibility = 1.8
+
+//compileTestJava {
+//  sourceCompatibility = 1.8
+//}
 
 repositories {
-    mavenCentral()
-    jcenter()
-    maven {
-        url = 'https://oss.sonatype.org/content/repositories/snapshots/'
-    }
+  mavenCentral()
+  jcenter()
+  maven {
+    url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+  }
 }
 
 dependencies {
-    compile "io.netty:netty-handler:4.1.0.Beta8"
-    compile "org.sharegov:mjson:1.3"
+  compile "io.netty:netty-handler:4.1.0.Beta8"
+  compile "org.sharegov:mjson:1.3"
 
 
-    testCompile group: 'junit', name: 'junit', version: '4.11'
+  testCompile group: 'junit', name: 'junit', version: '4.11'
+  testCompile group: 'io.vertx', name: 'vertx-core', version: '3.3.3'
+  testCompile group: 'io.vertx', name: 'vertx-tcp-eventbus-bridge', version: '3.3.3'
+  testCompile group: 'io.netty', name: 'netty-handler', version: '4.1.5.FINAL'
 }

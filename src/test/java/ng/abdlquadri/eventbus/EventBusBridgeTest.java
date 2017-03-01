@@ -1,8 +1,13 @@
+package ng.abdlquadri.eventbus;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.CountDownLatch;
+
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Vertx;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -10,9 +15,10 @@ import org.junit.Test;
 
 import mjson.Json;
 
-import ng.abdlquadri.eventbus.EventBus;
+import ng.abdlquadri.TestAttributes;
 import ng.abdlquadri.eventbus.handlers.ConnectHandler;
 import ng.abdlquadri.eventbus.handlers.Handler;
+import ng.abdlquadri.server.TCPBridgedChatServer;
 
 
 /**
@@ -23,15 +29,24 @@ public class EventBusBridgeTest {
   @BeforeClass
   public static void createServer() throws InterruptedException {
     final CountDownLatch countDownLatch = new CountDownLatch(1);
-    EventBus.connect("127.0.0.1", 7171, new ConnectHandler() {
+    Vertx.vertx().deployVerticle(new TCPBridgedChatServer(), new io.vertx.core.Handler<AsyncResult<String>>() {
+      @Override
+      public void handle(AsyncResult<String> result) {
+        assertTrue(result.succeeded());
+        countDownLatch.countDown();
+      }
+    });
+    countDownLatch.await();
 
+    final CountDownLatch countDownLatch1 = new CountDownLatch(1);
+    EventBus.connect(TestAttributes.SERVER, TestAttributes.PORT, new ConnectHandler() {
       public void onConnect(boolean isConnected) {
         if (isConnected) {
           assertTrue(isConnected);
         } else {
           assertFalse(isConnected);
         }
-        countDownLatch.countDown();
+        countDownLatch1.countDown();
       }
 
       public void onDisConnect(Throwable cause) {
@@ -39,7 +54,7 @@ public class EventBusBridgeTest {
       }
 
     });
-    countDownLatch.await();
+    countDownLatch1.await();
   }
 
   @AfterClass
@@ -51,13 +66,13 @@ public class EventBusBridgeTest {
   @Test
   public void testSend() throws InterruptedException {
 
-    EventBus.send("hello", Json.object().set("value", "from send Bridge").toString());
+    EventBus.send(TestAttributes.HELLO_ADDRESS, Json.object().set("value", "from send Bridge").toString());
   }
 
   @Test
   public void testSendWithReply() throws InterruptedException {
     final CountDownLatch countDownLatch = new CountDownLatch(1);
-    EventBus.send("hello", Json.object().set("value", "from sendW Bridge").toString(), new Handler() {
+    EventBus.send(TestAttributes.HELLO_ADDRESS, Json.object().set("value", "from sendW Bridge").toString(), new Handler() {
       @Override
       public void handle(String message) {
         String value = Json.read(message).at("body").at("value").asString();
@@ -71,7 +86,7 @@ public class EventBusBridgeTest {
   @Test
   public void testRegister() throws InterruptedException {
     final CountDownLatch countDownLatch = new CountDownLatch(1);
-    EventBus.registerHandler("hello", new Handler() {
+    EventBus.registerHandler(TestAttributes.HELLO_ADDRESS, new Handler() {
       @Override
       public void handle(String message) {
         System.out.println("TEST " + message);
@@ -80,7 +95,7 @@ public class EventBusBridgeTest {
       }
     });
 
-    EventBus.publish("hello", Json.object().set("value", "some messgae").toString());
+    EventBus.publish(TestAttributes.HELLO_ADDRESS, Json.object().set("value", "some messgae").toString());
     countDownLatch.await();
   }
 
