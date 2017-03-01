@@ -8,8 +8,6 @@ import java.util.concurrent.CountDownLatch;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
-import io.vertx.core.VertxOptions;
-import io.vertx.ext.hawkular.VertxHawkularOptions;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;

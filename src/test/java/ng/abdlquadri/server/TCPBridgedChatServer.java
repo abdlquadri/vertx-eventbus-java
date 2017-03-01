@@ -1,7 +1,5 @@
 package ng.abdlquadri.server;
 
-import java.util.Map;
-
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
