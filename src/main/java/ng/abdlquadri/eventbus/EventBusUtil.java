@@ -1,7 +1,5 @@
 package ng.abdlquadri.eventbus;
 
-import static ng.abdlquadri.eventbus.EventBus.globalConnectHandler;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -53,19 +51,13 @@ public class EventBusUtil {
       channelFuture.addListener(new ChannelFutureListener() {
         @Override
         public void operationComplete(ChannelFuture future) throws Exception {
-          if (channel.isActive()) {
-            log.log(Level.INFO, "CHANNEL IS ACTIVE");
-            if (future.isDone() && future.isSuccess()) {
-              writeHandler.written(true);
-              log.log(Level.INFO, "Done Writing to wire.");
-            } else {
-              writeHandler.written(false);
-              log.log(Level.SEVERE, "Failed Writing to wire.");
-            }
-          } else {
-            log.log(Level.SEVERE, "CHANNEL NOT ACTIVE");
-            globalConnectHandler.onDisConnect(new IllegalStateException("You are disconnected from the EventBus"));
 
+          if (future.isDone() && future.isSuccess()) {
+            writeHandler.written(true);
+            log.log(Level.INFO, "Done Writing to wire.");
+          } else {
+            writeHandler.written(false);
+            log.log(Level.SEVERE, "Failed Writing to wire.");
           }
 
         }
@@ -88,9 +80,10 @@ public class EventBusUtil {
       log.log(Level.INFO, "Done Adding Handlers to Eventbus. # of Current Hanlders {1}", handlers.size());
 
     } else {
-      handlers.add(handler);
 
-      EventBus.handlers.replace(address, handlers);
+      if (EventBus.handlers.containsKey(address)) {
+        EventBus.handlers.put(address, handlers);
+      }
       log.log(Level.INFO, "Replaced Handler on Eventbus. # of Current Hanlders {1}", handlers.size());
     }
 
@@ -98,13 +91,17 @@ public class EventBusUtil {
 
   public static void addReplyHandler(String address, Handler handler) {
     log.log(Level.INFO, "Adding ReplyHandlers for Eventbus Address {1}", address);
-    EventBus.replyHandlers.putIfAbsent(address, handler);
+    if (!EventBus.replyHandlers.containsKey(address)) {
+      EventBus.replyHandlers.put(address, handler);
+    }
     log.log(Level.INFO, "Done Adding ReplyHandlers for Eventbus Address {1}", address);
   }
 
   public static void addReplySender(String address, ReplySender sender) {
     log.log(Level.INFO, "Adding ReplySenders for Eventbus Address {1}", address);
-    EventBus.replySenders.putIfAbsent(address, sender);
+    if (!EventBus.replySenders.containsKey(address)) {
+      EventBus.replySenders.put(address, sender);
+    }
     log.log(Level.INFO, "Done Adding ReplySenders for Eventbus Address {1}", address);
   }
 }

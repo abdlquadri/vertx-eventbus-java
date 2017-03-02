@@ -1,6 +1,7 @@
 package ng.abdlquadri.eventbus;
 
 import static ng.abdlquadri.eventbus.EventBus.channel;
+import static ng.abdlquadri.eventbus.EventBus.globalConnectHandler;
 import static ng.abdlquadri.eventbus.EventBus.handlers;
 import static ng.abdlquadri.eventbus.EventBus.replyHandlers;
 import static ng.abdlquadri.eventbus.EventBusUtil.addReplySender;
@@ -28,6 +29,7 @@ public class EventBusFrameHandler extends SimpleChannelInboundHandler {
 
   @Override
   public void channelActive(ChannelHandlerContext ctx) throws Exception {
+    log.log(Level.INFO, "CHANNEL IS ACTIVE");
     if (channel.isActive()) {
       sendPing(channel);
     }
@@ -39,6 +41,13 @@ public class EventBusFrameHandler extends SimpleChannelInboundHandler {
         }
       }
     }, 5, 5, TimeUnit.SECONDS);
+
+  }
+
+  @Override
+  public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+    log.log(Level.SEVERE, "CHANNEL NOT ACTIVE");
+    globalConnectHandler.onDisConnect(new IllegalStateException("You are disconnected from the EventBus"));
 
   }
 
