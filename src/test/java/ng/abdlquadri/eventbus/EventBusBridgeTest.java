@@ -6,15 +6,15 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.CountDownLatch;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Vertx;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import mjson.Json;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Vertx;
 import ng.abdlquadri.TestAttributes;
 import ng.abdlquadri.eventbus.handlers.ConnectHandler;
 import ng.abdlquadri.eventbus.handlers.Handler;
@@ -65,17 +65,21 @@ public class EventBusBridgeTest {
 
   @Test
   public void testSend() throws InterruptedException {
-
-    EventBus.send(TestAttributes.HELLO_ADDRESS, Json.object().set("value", "from send Bridge").toString());
+	JsonObject json = new JsonObject();
+	json.addProperty("value", "from send Bridge");
+    EventBus.send(TestAttributes.HELLO_ADDRESS, json.toString());
   }
 
   @Test
   public void testSendWithReply() throws InterruptedException {
     final CountDownLatch countDownLatch = new CountDownLatch(1);
-    EventBus.send(TestAttributes.HELLO_ADDRESS, Json.object().set("value", "from sendW Bridge").toString(), new Handler() {
+	JsonObject json = new JsonObject();
+	json.addProperty("value", "from sendW Bridge");
+    EventBus.send(TestAttributes.HELLO_ADDRESS, json.toString(), new Handler() {
       @Override
       public void handle(String message) {
-        String value = Json.read(message).at("body").at("value").asString();
+        String value = new JsonParser().parse(message).getAsJsonObject().get("body")
+        		.getAsJsonObject().get("value").getAsString();
         assertEquals("Hello from sendW Bridge", value);
         countDownLatch.countDown();
       }
@@ -89,13 +93,15 @@ public class EventBusBridgeTest {
     EventBus.registerHandler(TestAttributes.HELLO_ADDRESS, new Handler() {
       @Override
       public void handle(String message) {
-        System.out.println("TEST " + message);
-        assertEquals("some messgae", Json.read(message).at("body").at("value").asString());
+        String value = new JsonParser().parse(message).getAsJsonObject().get("body")
+        		.getAsJsonObject().get("value").getAsString();
+        assertEquals("from sendW Bridge", value);
         countDownLatch.countDown();
       }
     });
-
-    EventBus.publish(TestAttributes.HELLO_ADDRESS, Json.object().set("value", "some messgae").toString());
+	JsonObject json = new JsonObject();
+	json.addProperty("value", "from sendW Bridge");
+    EventBus.publish(TestAttributes.HELLO_ADDRESS, json.toString());
     countDownLatch.await();
   }
 
