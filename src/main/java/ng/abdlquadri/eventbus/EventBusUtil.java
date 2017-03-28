@@ -57,7 +57,8 @@ public class EventBusUtil {
             log.log(Level.FINE, "Done Writing to wire.");
           } else {
             writeHandler.written(false);
-            log.log(Level.SEVERE, "Failed Writing to wire.");
+          // happens when connection falls away, already throws
+          log.log(Level.FINER, "Failed Writing to wire.");
           }
 
         }
