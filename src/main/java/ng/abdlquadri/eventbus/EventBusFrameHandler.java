@@ -12,24 +12,25 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-
-import mjson.Json;
-
 import ng.abdlquadri.eventbus.handlers.Handler;
 import ng.abdlquadri.eventbus.senders.ReplySender;
 
 /**
  * Created by abdlquadri on 12/9/15.
  */
-public class EventBusFrameHandler extends SimpleChannelInboundHandler {
+public class EventBusFrameHandler extends SimpleChannelInboundHandler<Object> {
   private Logger log = Logger.getLogger(EventBusFrameHandler.class.getName());
 
   @Override
   public void channelActive(ChannelHandlerContext ctx) throws Exception {
-    log.log(Level.INFO, "CHANNEL IS ACTIVE");
+    log.log(Level.FINE, "CHANNEL IS ACTIVE");
     if (channel.isActive()) {
       sendPing(channel);
     }
@@ -46,7 +47,8 @@ public class EventBusFrameHandler extends SimpleChannelInboundHandler {
 
   @Override
   public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-    log.log(Level.SEVERE, "CHANNEL NOT ACTIVE");
+	// log OR throw exception, never both
+	// log.log(Level.SEVERE, "CHANNEL NOT ACTIVE");
     globalConnectHandler.onDisConnect(new IllegalStateException("You are disconnected from the EventBus"));
 
   }
@@ -55,10 +57,10 @@ public class EventBusFrameHandler extends SimpleChannelInboundHandler {
   protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
     ByteBuf inMsg = (ByteBuf) msg;
     String eventBusMessage = messageBufferToString(inMsg);
-    Json json = Json.read(eventBusMessage);
-    final Json replyAddress = json.at("replyAddress");
-    Json address = json.at("address");
-    Json type = json.at("type");
+    JsonObject json =  new JsonParser().parse(eventBusMessage).getAsJsonObject();
+    JsonElement replyAddress = json.get("replyAddress");
+    JsonElement address = json.get("address");
+    JsonElement type = json.get("type");
     if (replyAddress != null) {
       addReplySender(replyAddress.toString(), new ReplySender() {
         @Override
@@ -81,7 +83,7 @@ public class EventBusFrameHandler extends SimpleChannelInboundHandler {
     }
 
     if (address != null) {
-      String stAddress = address.asString();
+      String stAddress = address.getAsString();
       if (handlers.containsKey(stAddress)) {
         List<Handler> messageHandlers = handlers.get(stAddress);
         for (Handler h : messageHandlers) {
@@ -120,7 +122,7 @@ public class EventBusFrameHandler extends SimpleChannelInboundHandler {
 
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-    log.log(Level.WARNING, cause.getMessage());
+    log.log(Level.WARNING, cause.getMessage(), cause);
     ctx.close();
   }
 
