@@ -5,9 +5,9 @@ apply plugin: 'java'
 
 project.sourceCompatibility = 1.7
 
-//compileTestJava {
-//  sourceCompatibility = 1.8
-//}
+compileTestJava {
+  sourceCompatibility = 1.8
+}
 
 repositories {
   mavenCentral()
