@@ -61,6 +61,7 @@ public class EventBus {
     });
   }
 
+
   public static void send(String address, String jsonMessage, Handler handler) {
     String replyAddress = UUID.randomUUID().toString();
     Json json = Json.object().set(EventBusMessageAttributes.TYPE, "send")
@@ -76,6 +77,24 @@ public class EventBus {
       }
     });
   }
+  public static void send(String address, String jsonMessage,String reply_address,Boolean nouse,Handler handler) {
+    String replyAddress = reply_address;
+    Json json = Json.object().set(EventBusMessageAttributes.TYPE, "send")
+      .set(EventBusMessageAttributes.ADDRESS, address)
+      .set(EventBusMessageAttributes.REPLY_ADDRESS, replyAddress)
+      .set(EventBusMessageAttributes.HEADERS, Json.object())
+      .set(EventBusMessageAttributes.BODY, Json.read(jsonMessage));
+    addReplyHandler(replyAddress, handler);
+    writeToWire(channel, json.toString(), new WriteHandler() {
+      @Override
+      public void written(boolean isWritten) {
+
+      }
+    });
+  }
+
+
+
 
   public static void send(String address, String jsonMessage, String jsonHeaders) {
     log.log(Level.INFO, "Making a SEND to EventBus Server");
@@ -111,6 +130,20 @@ public class EventBus {
   public static void send(String address, String jsonMessage) {
     Json json = Json.object().set(EventBusMessageAttributes.TYPE, "send")
       .set(EventBusMessageAttributes.ADDRESS, address)
+      .set(EventBusMessageAttributes.HEADERS, Json.object())
+      .set(EventBusMessageAttributes.BODY, Json.read(jsonMessage));
+    writeToWire(channel, json.toString(), new WriteHandler() {
+      @Override
+      public void written(boolean isWritten) {
+
+      }
+    });
+  }
+  public static void send(String address, String jsonMessage,String reply_address,Boolean nouse) {
+    String replyAddress = reply_address;
+    Json json = Json.object().set(EventBusMessageAttributes.TYPE, "send")
+      .set(EventBusMessageAttributes.ADDRESS, address)
+      .set(EventBusMessageAttributes.REPLY_ADDRESS, replyAddress)
       .set(EventBusMessageAttributes.HEADERS, Json.object())
       .set(EventBusMessageAttributes.BODY, Json.read(jsonMessage));
     writeToWire(channel, json.toString(), new WriteHandler() {
