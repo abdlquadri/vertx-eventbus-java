@@ -33,7 +33,8 @@ import ng.abdlquadri.eventbus.util.EventBusMessageAttributes;
  */
 public class EventBus {
   private static Logger log = Logger.getLogger(EventBus.class.getName());
-
+  private static NioEventLoopGroup group;
+  private static Bootstrap bootstrap;
   public static Channel channel;
   public static final ConcurrentMap<String, List<Handler>> handlers = new ConcurrentHashMap<String, List<Handler>>();
   public static final ConcurrentMap<String, Handler> replyHandlers = new ConcurrentHashMap<String, Handler>();
@@ -229,15 +230,15 @@ public class EventBus {
 
   public static void connect(String host, int port, final ConnectHandler connectHandler) {
     log.log(Level.INFO, "Connecting to EventBus Server");
-    NioEventLoopGroup group = new NioEventLoopGroup();
-
-    Bootstrap bootstrap = new Bootstrap();
-
-    bootstrap.group(group)
-      .channel(NioSocketChannel.class)
-      .remoteAddress(new InetSocketAddress(host, port))
-      .handler(new EventBusInitializer());
-
+//      final NioEventLoopGroup group = new NioEventLoopGroup();
+  final  NioEventLoopGroup group =groupCache();
+//    final Bootstrap bootstrap = new Bootstrap();
+//
+//    bootstrap.group(group)
+//      .channel(NioSocketChannel.class)
+//      .remoteAddress(new InetSocketAddress(host, port))
+//      .handler(new EventBusInitializer());
+final  Bootstrap  bootstrap =bootstrapCache(host,port);
     final ChannelFuture channelFuture = bootstrap.connect();
     channelFuture.addListener(new ChannelFutureListener() {
       @Override
@@ -250,6 +251,7 @@ public class EventBus {
 
         } else {
           connectHandler.onConnect(false);
+//          group.shutdownGracefully();
           log.log(Level.SEVERE, "Failed Connecting to EventBus Server");
 
         }
@@ -259,9 +261,28 @@ public class EventBus {
 
   }
 
+  private static   NioEventLoopGroup  groupCache(){
+          if (group==null){
+            group = new NioEventLoopGroup();
+          }
+          return  group;
+  }
+
+  private static  Bootstrap  bootstrapCache(String host, int port){
+        if (bootstrap==null){
+           bootstrap = new Bootstrap();
+
+          bootstrap.group(group)
+            .channel(NioSocketChannel.class)
+            .remoteAddress(new InetSocketAddress(host, port))
+            .handler(new EventBusInitializer());
+        }
+        return bootstrap;
+  }
   public static void close() {
     if (channel != null) {
       final ChannelFuture closeFuture = channel.close();
+
       closeFuture.addListener(new ChannelFutureListener() {
         public void operationComplete(ChannelFuture future) throws Exception {
           if (future.isSuccess() && future.isDone()){
