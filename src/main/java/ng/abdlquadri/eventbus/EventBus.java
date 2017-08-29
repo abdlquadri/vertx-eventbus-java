@@ -33,7 +33,8 @@ import ng.abdlquadri.eventbus.util.EventBusMessageAttributes;
  */
 public class EventBus {
   private static Logger log = Logger.getLogger(EventBus.class.getName());
-
+  private static NioEventLoopGroup group;
+  private static Bootstrap bootstrap;
   public static Channel channel;
   public static final ConcurrentMap<String, List<Handler>> handlers = new ConcurrentHashMap<String, List<Handler>>();
   public static final ConcurrentMap<String, Handler> replyHandlers = new ConcurrentHashMap<String, Handler>();
@@ -61,6 +62,7 @@ public class EventBus {
     });
   }
 
+
   public static void send(String address, String jsonMessage, Handler handler) {
     String replyAddress = UUID.randomUUID().toString();
     Json json = Json.object().set(EventBusMessageAttributes.TYPE, "send")
@@ -76,6 +78,24 @@ public class EventBus {
       }
     });
   }
+  public static void send(String address, String jsonMessage,String reply_address,Boolean nouse,Handler handler) {
+    String replyAddress = reply_address;
+    Json json = Json.object().set(EventBusMessageAttributes.TYPE, "send")
+      .set(EventBusMessageAttributes.ADDRESS, address)
+      .set(EventBusMessageAttributes.REPLY_ADDRESS, replyAddress)
+      .set(EventBusMessageAttributes.HEADERS, Json.object())
+      .set(EventBusMessageAttributes.BODY, Json.read(jsonMessage));
+    addReplyHandler(replyAddress, handler);
+    writeToWire(channel, json.toString(), new WriteHandler() {
+      @Override
+      public void written(boolean isWritten) {
+
+      }
+    });
+  }
+
+
+
 
   public static void send(String address, String jsonMessage, String jsonHeaders) {
     log.log(Level.INFO, "Making a SEND to EventBus Server");
@@ -111,6 +131,20 @@ public class EventBus {
   public static void send(String address, String jsonMessage) {
     Json json = Json.object().set(EventBusMessageAttributes.TYPE, "send")
       .set(EventBusMessageAttributes.ADDRESS, address)
+      .set(EventBusMessageAttributes.HEADERS, Json.object())
+      .set(EventBusMessageAttributes.BODY, Json.read(jsonMessage));
+    writeToWire(channel, json.toString(), new WriteHandler() {
+      @Override
+      public void written(boolean isWritten) {
+
+      }
+    });
+  }
+  public static void send(String address, String jsonMessage,String reply_address,Boolean nouse) {
+    String replyAddress = reply_address;
+    Json json = Json.object().set(EventBusMessageAttributes.TYPE, "send")
+      .set(EventBusMessageAttributes.ADDRESS, address)
+      .set(EventBusMessageAttributes.REPLY_ADDRESS, replyAddress)
       .set(EventBusMessageAttributes.HEADERS, Json.object())
       .set(EventBusMessageAttributes.BODY, Json.read(jsonMessage));
     writeToWire(channel, json.toString(), new WriteHandler() {
@@ -196,15 +230,15 @@ public class EventBus {
 
   public static void connect(String host, int port, final ConnectHandler connectHandler) {
     log.log(Level.INFO, "Connecting to EventBus Server");
-    NioEventLoopGroup group = new NioEventLoopGroup();
-
-    Bootstrap bootstrap = new Bootstrap();
-
-    bootstrap.group(group)
-      .channel(NioSocketChannel.class)
-      .remoteAddress(new InetSocketAddress(host, port))
-      .handler(new EventBusInitializer());
-
+//      final NioEventLoopGroup group = new NioEventLoopGroup();
+  final  NioEventLoopGroup group =groupCache();
+//    final Bootstrap bootstrap = new Bootstrap();
+//
+//    bootstrap.group(group)
+//      .channel(NioSocketChannel.class)
+//      .remoteAddress(new InetSocketAddress(host, port))
+//      .handler(new EventBusInitializer());
+final  Bootstrap  bootstrap =bootstrapCache(host,port);
     final ChannelFuture channelFuture = bootstrap.connect();
     channelFuture.addListener(new ChannelFutureListener() {
       @Override
@@ -217,6 +251,7 @@ public class EventBus {
 
         } else {
           connectHandler.onConnect(false);
+//          group.shutdownGracefully();
           log.log(Level.SEVERE, "Failed Connecting to EventBus Server");
 
         }
@@ -226,9 +261,28 @@ public class EventBus {
 
   }
 
+  private static   NioEventLoopGroup  groupCache(){
+          if (group==null){
+            group = new NioEventLoopGroup();
+          }
+          return  group;
+  }
+
+  private static  Bootstrap  bootstrapCache(String host, int port){
+        if (bootstrap==null){
+           bootstrap = new Bootstrap();
+
+          bootstrap.group(group)
+            .channel(NioSocketChannel.class)
+            .remoteAddress(new InetSocketAddress(host, port))
+            .handler(new EventBusInitializer());
+        }
+        return bootstrap;
+  }
   public static void close() {
     if (channel != null) {
       final ChannelFuture closeFuture = channel.close();
+
       closeFuture.addListener(new ChannelFutureListener() {
         public void operationComplete(ChannelFuture future) throws Exception {
           if (future.isSuccess() && future.isDone()){

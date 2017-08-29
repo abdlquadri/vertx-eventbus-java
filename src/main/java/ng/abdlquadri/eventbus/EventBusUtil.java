@@ -1,21 +1,20 @@
 package ng.abdlquadri.eventbus;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-
 import mjson.Json;
-
 import ng.abdlquadri.eventbus.handlers.Handler;
 import ng.abdlquadri.eventbus.handlers.WriteHandler;
 import ng.abdlquadri.eventbus.senders.ReplySender;
+
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by abdlquadri on 12/19/15.
@@ -40,10 +39,15 @@ public class EventBusUtil {
   }
 
   public static void writeToWire(final Channel channel, String jsonObject, final WriteHandler writeHandler) {
-    int length = jsonObject.length();
-    ByteBuf buffer = Unpooled.buffer()
-      .writeInt(length)
-      .writeBytes(jsonObject.getBytes());
+    int length = jsonObject.toString().getBytes().length;
+    ByteBuf buffer = null;
+    try {
+      buffer = Unpooled.buffer()
+        .writeInt(length)
+        .writeBytes(jsonObject.getBytes("utf-8"));
+    } catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+    }
     log.log(Level.INFO, "Writing to wire.");
 
     if (channel != null) {

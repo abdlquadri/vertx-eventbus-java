@@ -1,25 +1,20 @@
 package ng.abdlquadri.eventbus;
 
-import static ng.abdlquadri.eventbus.EventBus.channel;
-import static ng.abdlquadri.eventbus.EventBus.globalConnectHandler;
-import static ng.abdlquadri.eventbus.EventBus.handlers;
-import static ng.abdlquadri.eventbus.EventBus.replyHandlers;
-import static ng.abdlquadri.eventbus.EventBusUtil.addReplySender;
-import static ng.abdlquadri.eventbus.EventBusUtil.sendPing;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
+import mjson.Json;
+import ng.abdlquadri.eventbus.handlers.Handler;
+import ng.abdlquadri.eventbus.senders.ReplySender;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
-
-import mjson.Json;
-
-import ng.abdlquadri.eventbus.handlers.Handler;
-import ng.abdlquadri.eventbus.senders.ReplySender;
+import static ng.abdlquadri.eventbus.EventBus.*;
+import static ng.abdlquadri.eventbus.EventBusUtil.addReplySender;
+import static ng.abdlquadri.eventbus.EventBusUtil.sendPing;
 
 /**
  * Created by abdlquadri on 12/9/15.
@@ -110,12 +105,10 @@ public class EventBusFrameHandler extends SimpleChannelInboundHandler {
 
   private String messageBufferToString(ByteBuf inMsg) {
     int messageLength = inMsg.readInt();
-    StringBuilder message = new StringBuilder();
-    for (int i = 0; i < messageLength; i++) {
-      char c = (char) inMsg.readByte();
-      message.append(c);
-    }
-    return message.toString();
+
+    byte[] req = new byte[inMsg.readableBytes()];
+    inMsg.readBytes(req);
+    return new String(req);
   }
 
   @Override
